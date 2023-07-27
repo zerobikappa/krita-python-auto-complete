@@ -7,15 +7,39 @@ generatorVersion = 0.1
 #os.chdir("C:\\dev\\krita\\libs\\libkis")  # possible Windows OS dir. need to have two "\" symbols
 # os.chdir("/home/scottpetrovic/krita/src/libs/libkis")
 
-kritaHomeDir = r"F:\Krita\krita".replace('\\', '/') # Change this to an apprioporite path, depending on where your Krita source code is.
+import tempfile
+import imp
+from tkinter.filedialog import askdirectory
+from tkinter.messagebox import askyesno
+kritaHomeDir =  ""
+savedConfig = tempfile.gettempdir()+"/kritaHomeDirSave.py"
+if os.path.isfile(savedConfig):
+    isToLoadSavedConfig = askyesno("use previous config", f"Krita source path config was found in {savedConfig}, would you like to use it?")
+    if isToLoadSavedConfig:
+        m = imp.load_source("myModule", savedConfig)
+        kritaHomeDir = m.kritaHomeDir
+        del m
+
+if kritaHomeDir.__len__() == 0:
+    kritaHomeDir = askdirectory(title="choose the directory of Krita source code:")
+    if os.path.isdir(kritaHomeDir):
+        print(f"kritaHomeDir = {kritaHomeDir}")
+        exportSaveConfigFile = open(savedConfig, "w")
+        exportSaveConfigFile.write(f"kritaHomeDir = \"{kritaHomeDir}\"")
+        exportSaveConfigFile.close()
+    else:
+        print(f"kritaHomeDir = {kritaHomeDir}, not a vaild path")
+        quit(1)
+#kritaHomeDir = r"/home/zerobikappa/downloads/4-krita/krita-5.1.5".replace('\\', '/') # Change this to an apprioporite path, depending on where your Krita source code is.
 # Note that you need to have the actual source code & not a prebuilt version of Krita. THIS DIRETORY SHOULD HAVE THE CMakeLists.txt FILE directly in it
 
-kritaLibLibKisPath = f"{kritaHomeDir}/libs\libkis"
+kritaLibLibKisPath = f"{kritaHomeDir}/libs/libkis"
 
 
-kritaCMakeListTxtPathIncludingFileNameAndExtension = f"{kritaHomeDir}/CMakeLists.txt"
+#kritaCMakeListTxtPathIncludingFileNameAndExtension = f"{kritaHomeDir}/CMakeLists.txt"
 
-moduleDestinationPath = r"C:\Users\olliv\Desktop\pyKritaOuter".replace('\\', '/') # Where to store the output module
+cwd = os.getcwd()
+moduleDestinationPath = fr"{cwd}/output".replace('\\', '/') # Where to store the output module
 
 import os
 import glob
@@ -43,68 +67,112 @@ os.chdir(kritaLibLibKisPath)
 os.makedirs(f"{moduleDestinationPath}", exist_ok=True)
 
 exportFile = open(f"{moduleDestinationPath}/__init__.py", "w+")
-readMeFile = open(f"{packageDestinationPath}/README.md", "w+")
-
-def search_string_in_file(file_name: str, string_to_search: str) -> tuple[int, str]:
-    """Returns all occurances of string_to_search as a list, where each list element is a tuple, where index 0 is the line number & index 1 is the full line as a string."""
-    line_number = 0
-    list_of_results = []
-    # Open the file in read only mode
-    with open(file_name, 'r') as read_obj:
-        # Read all lines in the file one by one
-        for line in read_obj:
-            # For each line, check if line contains the string
-            line_number += 1
-            if string_to_search in line:
-                # If yes, then add the line number & line as a tuple in the list
-                list_of_results.append((line_number, line.rstrip()))
-    # Return list of tuples containing line numbers and lines where string is found
-    return list_of_results
-
-kritaVersion = search_string_in_file(kritaCMakeListTxtPathIncludingFileNameAndExtension, "set(KRITA_VERSION_STRING")[0][1]
-kritaVersion = kritaVersion[kritaVersion.find('"')+1:kritaVersion.rfind('"')]
-readMeFile.write(f"""
-# Fake PyKrita
-## Auto completion Python module for Krita version {kritaVersion}.
- 
-
-""")
-readMeFile.close()
-from setuptools import setup, find_packages
-setup
-import datetime
-
-formattedDateTime = datetime.datetime.now().strftime(r'%d %B %Y %H %M %S')
-# print(formattedDateTime)
-
-setupPyFile = open(setupPyFilePathIncludingFileNameAndExtension, "w+")
-setupPyFile.write(f"""from setuptools import setup, find_packages
-
-setup(
-    # name='PyKrita{kritaVersion}',
-    name='Fake PyKrita for Krita v {kritaVersion} build date {formattedDateTime}',
-    version='{generatorVersion}',
-    # version = '0.1',
-    license='Unknown',
-    author="Source code generator by scottpetrovic, modified by Olliver Aira aka officernickwilde.",
-    author_email='olliver.aira@gmail.com',
-    packages=find_packages('src'),
-    package_dir={{'': 'src'}},
-    # url='https://github.com',
-    keywords='Krita intellisense autocomplete autocompletion Python PyKrita code highlight fake module',
-    install_requires=[],
-
-)
-""")
-setupPyFile.close()
+#readMeFile = open(f"{packageDestinationPath}/README.md", "w+")
+#
+#def search_string_in_file(file_name: str, string_to_search: str) -> tuple[int, str]:
+#    """Returns all occurances of string_to_search as a list, where each list element is a tuple, where index 0 is the line number & index 1 is the full line as a string."""
+#    line_number = 0
+#    list_of_results = []
+#    # Open the file in read only mode
+#    with open(file_name, 'r') as read_obj:
+#        # Read all lines in the file one by one
+#        for line in read_obj:
+#            # For each line, check if line contains the string
+#            line_number += 1
+#            if string_to_search in line:
+#                # If yes, then add the line number & line as a tuple in the list
+#                list_of_results.append((line_number, line.rstrip()))
+#    # Return list of tuples containing line numbers and lines where string is found
+#    return list_of_results
+#
+#kritaVersion = search_string_in_file(kritaCMakeListTxtPathIncludingFileNameAndExtension, "set(KRITA_VERSION_STRING")[0][1]
+#kritaVersion = kritaVersion[kritaVersion.find('"')+1:kritaVersion.rfind('"')]
+#readMeFile.write(f"""
+## Fake PyKrita
+### Auto completion Python module for Krita version {kritaVersion}.
+# 
+#
+#""")
+#readMeFile.close()
+#from setuptools import setup, find_packages
+#setup
+#import datetime
+#
+#formattedDateTime = datetime.datetime.now().strftime(r'%d %B %Y %H %M %S')
+## print(formattedDateTime)
+#
+#setupPyFile = open(setupPyFilePathIncludingFileNameAndExtension, "w+")
+#setupPyFile.write(f"""from setuptools import setup, find_packages
+#
+#setup(
+#    # name='PyKrita{kritaVersion}',
+#    name='Fake PyKrita for Krita v {kritaVersion} build date {formattedDateTime}',
+#    version='{generatorVersion}',
+#    # version = '0.1',
+#    license='Unknown',
+#    author="Source code generator by scottpetrovic, modified by Olliver Aira aka officernickwilde.",
+#    author_email='olliver.aira@gmail.com',
+#    packages=find_packages('src'),
+#    package_dir={{'': 'src'}},
+#    # url='https://github.com',
+#    keywords='Krita intellisense autocomplete autocompletion Python PyKrita code highlight fake module',
+#    install_requires=[],
+#
+#)
+#""")
+#setupPyFile.close()
 
 # a bit of a readme for what this does
-exportFile.write("# Auto-generated file that reads from H files in the libkis folder \n" +
-"# The purpose is to use as auto-complete in Python IDEs \n" )
+exportFile.write(f"""
+# Auto-generated file that reads from H files in the libkis folder
+# The purpose is to use as auto-complete in Python IDEs 
 
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
+
+""")
+
+
+# sort header files according to dependence
+headerFilelist = glob.glob("*.h")
+#from collections import defaultdict
+#d = defaultdict(list)
+d = { key: [] for key in headerFilelist}
+#print(headerFilelist)
+#print("d = " + str(d))
+for file in headerFilelist:
+    currentFile = open(file)
+    allFileLines = currentFile.readlines()
+    for line in allFileLines:
+        if line.__contains__("#include"):
+            includeFile = line.replace("#include", "").replace("\"", "").replace("\n", "").strip()
+            if headerFilelist.__contains__(includeFile):
+                d[file].append(includeFile)
+            includeFile = ""
+
+headerFilelist2 = []
+
+while d.__len__() > 0:
+    beforeLen = d.__len__()
+    for key1 in d.keys():
+        if d[key1].__len__() == 0:
+            headerFilelist2.append(key1)
+            for key2 in d.keys():
+                while d[key2].__contains__(key1):
+                    d[key2].remove(key1)
+            del d[key1]
+            break
+    if d.__len__() == beforeLen:
+        print("cycle exists!")
+        print(f"headerFilelist = ${headerFilelist}")
+        print(f"headerFilelist2 = ${headerFilelist2}")
+        quit()
 
 # grab all h files and iterate through them
-for file in glob.glob("*.h"):
+#for file in glob.glob("*.h"):
+for file in headerFilelist2:
     currentFile = open(file)
 
 
@@ -112,6 +180,28 @@ for file in glob.glob("*.h"):
 
     allFileLines = currentFile.readlines() # readlines creates a list of the lines
     #exportFile.write(allFileLines[1])
+
+    # remove all empty lines
+    tempSaveLines = list()
+    for line in allFileLines:
+        if line.strip().__len__() == 0:
+            continue
+        else:
+            tempSaveLines.append(line)
+    allFileLines = tempSaveLines
+    del  tempSaveLines
+
+    # if function has too many arguments and some of arguments was splited to the next line
+    tempSaveLines = list()
+    for i in range(0, allFileLines.__len__() - 1):
+        if allFileLines[i].strip()[-1] == ',' and allFileLines[i].count('(') > allFileLines[0].count(')'):
+            allFileLines[i+1] = allFileLines[i].replace("\n", "").strip() + allFileLines[i+1].strip()
+        else:
+            tempSaveLines.append(allFileLines[i])
+
+    allFileLines = tempSaveLines
+    del tempSaveLines
+
 
     # find all classes that need to be exported
     classPattern = re.compile("KRITALIBKIS_EXPORT")
@@ -166,6 +256,10 @@ for file in glob.glob("*.h"):
 
 
     # if we see some comments for the class, so try to read them...
+    indentspace0 = ''
+    indentspace4 = '    '
+    indentspace8 = '        '
+    indentspace = ''
     if classCommentsEnd != -1:
 
         classCommentsStartIndex = -1
@@ -186,12 +280,14 @@ for file in glob.glob("*.h"):
             classCommentsOutput = classCommentsOutput.replace("*", "")
         else:
             classCommentsOutput = "Trouble Parsing class comments"
+        indentspace = indentspace4
     else:
         classCommentsOutput = "Class not documented"
+        indentspace = indentspace0
 
 
 
-    exportFile.write("    \"\"\" " +  classCommentsOutput   +  "    \"\"\""  +   "\n\n")
+    exportFile.write(f"{indentspace}\"\"\" " +  classCommentsOutput   +  "    \"\"\""  +   "\n\n")
 
 
 
@@ -250,12 +346,14 @@ for file in glob.glob("*.h"):
                     # if we made it this far that means we are a valid function
                     # now we need to figure out how to parse this and format it for python
                     isVirtual = False
-                    returnType = "void"
+#                    returnType = "void"
+                    returnType = "None"
                     isExplicit = False
+                    isStatic = False
 
                     functionLineNumber = j
                     functionList = line.split("(")[0]
-                    functionList = functionList.replace("*", "").replace("const", "").replace(" >", ">")
+                    functionList = functionList.replace("*", "").replace("const", "").replace(">", "")
 
                     if "virtual" in functionList:
                         isVirtual = True
@@ -264,6 +362,10 @@ for file in glob.glob("*.h"):
                     if "explicit" in functionList:
                         isExplicit = True
                         functionList = functionList.split("explicit")[1]
+
+                    if functionList.strip()[0:7] == "static ":
+                        isStatic = True
+                        functionList = functionList.split("static")[1]
                     
 
 
@@ -272,6 +374,12 @@ for file in glob.glob("*.h"):
                     #first word is usually the return type
                     if " " in functionList:
                         returnType = functionList.split(' ')[0]
+                        if returnType == "void":
+                            returnType = "None"
+                        elif returnType == "QString":
+                            returnType = "str"
+                        elif returnType == "QList":
+                            returnType = "list"
                         functionList = functionList.split(' ')[1]
 
                     if functionList.__len__() < 1:
@@ -323,7 +431,7 @@ for file in glob.glob("*.h"):
                                 # due to the actual types never being declared.
                                 
                             except Exception as exception:
-                                print(f"Paramsplitting error -> {exception} <- for '{p}' in {paramsList} in '{line}'")
+                                print(f"Paramsplitting error -> {exception} <- for '{p}' in {paramsList} in '{line}' in {file}")
                                 # raise exception
                                 
 
@@ -332,10 +440,17 @@ for file in glob.glob("*.h"):
                     elif paramsList != "":
                         paramsList = paramsList.strip().split(" ")[0]
                         #Only one parameter. remove everything after the first word
-                    if paramsList.__len__() < 2:
-                        continue
+#                    if paramsList.__len__() < 2:
+#                        continue
 
-                    exportFile.write("    def " + functionList + "(" + paramsList + "):" "\n")
+#                    if paramsList.__len__() == 0:
+#                        paramsList = "self"
+#                    else:
+#                        paramsList = "self, " + paramsList
+                    if isStatic:
+                        exportFile.write(f"{indentspace}@staticmethod\n")
+
+                    exportFile.write(f"{indentspace}def " + functionList + "(" + paramsList + "):\n")
 
 
 
@@ -368,7 +483,7 @@ for file in glob.glob("*.h"):
                         while i9 < longestParamName - paramName.__len__():
                             i9 += 1
                             formatParamForDocStringSpacing += " "
-                        return f"\n{paramName}: {formatParamForDocStringSpacing}{paramType}"
+                        return f"\n{indentspace8}{paramName}: {formatParamForDocStringSpacing}{paramType}"
                     # finally export the final file
                     # listOfParamTypesAndNames.reverse()
                     parameterPartOfComment = ""
@@ -376,9 +491,10 @@ for file in glob.glob("*.h"):
                         parameterPartOfComment = f"{parameterPartOfComment}{formatParamForDocString(param.name, param.type)}"
                     newLine = '\n'
                     
-                    functionCommentsOutput = f"{newLine}{functionCommentsOutput}{newLine}{parameterPartOfComment}{formatParamForDocString('return', returnType)}{newLine}"
+                    functionCommentsOutput = f"{newLine}{indentspace8}{functionCommentsOutput}{newLine}{indentspace8}{parameterPartOfComment}{formatParamForDocString('return', returnType)}{newLine}"
                         
-                    exportFile.write("        \"\"\" " + functionCommentsOutput + " \"\"\" \n\n" )
+                    exportFile.write(f"{indentspace8}\"\"\" " + functionCommentsOutput + f"{indentspace8}\"\"\"\n" )
+                    exportFile.write(f"{indentspace8}return {returnType}\n\n" )
 
 
 
@@ -400,22 +516,22 @@ for file in glob.glob("*.h"):
 #     exportFileAsStrFINAL += f"{line}{newLine}"
 exportFile.close()
 
-import subprocess
-import os
-# print(f"""yo f'cd "{packageDestinationPath}" & Python setup.py sdist'""")
-
-os.chdir(packageDestinationPath)
-os.system(f'Python setup.py sdist')
-# os.system(f'start /d "{packageDestinationPath}" cmd /c "Python setup.py sdist" ')
-# import time
-# time.sleep(10)
-# os.system(f'start cmd /k "cd \"{packageDestinationPath}\" & Python \"{packageDestinationPath}/setup.py\" sdist" /d "{packageDestinationPath}"')
-# os.system(f'start cmd /k cd Python "{setupPyFilePathIncludingFileNameAndExtension}" sdist')
-# os.system(f'cd "{packageDestinationPath}" & Python setup.py sdist')
-# raise "wa"
-os.system(f'pip install twine')
-os.system(f'start /d "{packageDestinationPath}" cmd /c "Python setup.py sdist" ')
-os.system(f'cd "{packageDestinationPath}" & twine upload --verbose -r pypi "dist/*"')
+#import subprocess
+#import os
+## print(f"""yo f'cd "{packageDestinationPath}" & Python setup.py sdist'""")
+#
+#os.chdir(packageDestinationPath)
+#os.system(f'python setup.py sdist')
+## os.system(f'start /d "{packageDestinationPath}" cmd /c "Python setup.py sdist" ')
+## import time
+## time.sleep(10)
+## os.system(f'start cmd /k "cd \"{packageDestinationPath}\" & Python \"{packageDestinationPath}/setup.py\" sdist" /d "{packageDestinationPath}"')
+## os.system(f'start cmd /k cd Python "{setupPyFilePathIncludingFileNameAndExtension}" sdist')
+## os.system(f'cd "{packageDestinationPath}" & Python setup.py sdist')
+## raise "wa"
+#os.system(f'pip install twine')
+#os.system(f'start /d "{packageDestinationPath}" cmd /c "Python setup.py sdist" ')
+#os.system(f'cd "{packageDestinationPath}" & twine upload --verbose -r pypi "dist/*"')
 
 
 # import os
