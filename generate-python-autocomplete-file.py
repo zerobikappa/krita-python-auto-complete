@@ -9,6 +9,7 @@ generatorVersion = 0.1
 
 import tempfile
 import imp
+from importlib.machinery import SourceFileLoader
 from tkinter.filedialog import askdirectory
 from tkinter.messagebox import askyesno
 kritaHomeDir =  ""
@@ -16,8 +17,9 @@ savedConfig = tempfile.gettempdir()+"/kritaHomeDirSave.py"
 if os.path.isfile(savedConfig):
     isToLoadSavedConfig = askyesno("use previous config", f"Krita source path config was found in {savedConfig}, would you like to use it?")
     if isToLoadSavedConfig:
-        m = imp.load_source("myModule", savedConfig)
-        kritaHomeDir = m.kritaHomeDir
+#        m = imp.load_source("myModule", savedConfig)
+        m = SourceFileLoader("myModule", savedConfig).load_module()
+        kritaHomeDir = getattr(m, "kritaHomeDir")
         del m
 
 if kritaHomeDir.__len__() == 0:
@@ -30,13 +32,11 @@ if kritaHomeDir.__len__() == 0:
     else:
         print(f"kritaHomeDir = {kritaHomeDir}, not a vaild path")
         quit(1)
-#kritaHomeDir = r"/home/zerobikappa/downloads/4-krita/krita-5.1.5".replace('\\', '/') # Change this to an apprioporite path, depending on where your Krita source code is.
+#kritaHomeDir is an apprioporite path where your Krita source code is.
 # Note that you need to have the actual source code & not a prebuilt version of Krita. THIS DIRETORY SHOULD HAVE THE CMakeLists.txt FILE directly in it
 
 kritaLibLibKisPath = f"{kritaHomeDir}/libs/libkis"
 
-
-#kritaCMakeListTxtPathIncludingFileNameAndExtension = f"{kritaHomeDir}/CMakeLists.txt"
 
 cwd = os.getcwd()
 moduleDestinationPath = fr"{cwd}/output".replace('\\', '/') # Where to store the output module
@@ -67,60 +67,6 @@ os.chdir(kritaLibLibKisPath)
 os.makedirs(f"{moduleDestinationPath}", exist_ok=True)
 
 exportFile = open(f"{moduleDestinationPath}/__init__.py", "w+")
-#readMeFile = open(f"{packageDestinationPath}/README.md", "w+")
-#
-#def search_string_in_file(file_name: str, string_to_search: str) -> tuple[int, str]:
-#    """Returns all occurances of string_to_search as a list, where each list element is a tuple, where index 0 is the line number & index 1 is the full line as a string."""
-#    line_number = 0
-#    list_of_results = []
-#    # Open the file in read only mode
-#    with open(file_name, 'r') as read_obj:
-#        # Read all lines in the file one by one
-#        for line in read_obj:
-#            # For each line, check if line contains the string
-#            line_number += 1
-#            if string_to_search in line:
-#                # If yes, then add the line number & line as a tuple in the list
-#                list_of_results.append((line_number, line.rstrip()))
-#    # Return list of tuples containing line numbers and lines where string is found
-#    return list_of_results
-#
-#kritaVersion = search_string_in_file(kritaCMakeListTxtPathIncludingFileNameAndExtension, "set(KRITA_VERSION_STRING")[0][1]
-#kritaVersion = kritaVersion[kritaVersion.find('"')+1:kritaVersion.rfind('"')]
-#readMeFile.write(f"""
-## Fake PyKrita
-### Auto completion Python module for Krita version {kritaVersion}.
-# 
-#
-#""")
-#readMeFile.close()
-#from setuptools import setup, find_packages
-#setup
-#import datetime
-#
-#formattedDateTime = datetime.datetime.now().strftime(r'%d %B %Y %H %M %S')
-## print(formattedDateTime)
-#
-#setupPyFile = open(setupPyFilePathIncludingFileNameAndExtension, "w+")
-#setupPyFile.write(f"""from setuptools import setup, find_packages
-#
-#setup(
-#    # name='PyKrita{kritaVersion}',
-#    name='Fake PyKrita for Krita v {kritaVersion} build date {formattedDateTime}',
-#    version='{generatorVersion}',
-#    # version = '0.1',
-#    license='Unknown',
-#    author="Source code generator by scottpetrovic, modified by Olliver Aira aka officernickwilde.",
-#    author_email='olliver.aira@gmail.com',
-#    packages=find_packages('src'),
-#    package_dir={{'': 'src'}},
-#    # url='https://github.com',
-#    keywords='Krita intellisense autocomplete autocompletion Python PyKrita code highlight fake module',
-#    install_requires=[],
-#
-#)
-#""")
-#setupPyFile.close()
 
 # a bit of a readme for what this does
 exportFile.write(f"""
@@ -137,11 +83,7 @@ from PyQt5.QtWidgets import *
 
 # sort header files according to dependence
 headerFilelist = glob.glob("*.h")
-#from collections import defaultdict
-#d = defaultdict(list)
 d = { key: [] for key in headerFilelist}
-#print(headerFilelist)
-#print("d = " + str(d))
 for file in headerFilelist:
     currentFile = open(file)
     allFileLines = currentFile.readlines()
@@ -443,10 +385,6 @@ for file in headerFilelist2:
 #                    if paramsList.__len__() < 2:
 #                        continue
 
-#                    if paramsList.__len__() == 0:
-#                        paramsList = "self"
-#                    else:
-#                        paramsList = "self, " + paramsList
                     if isStatic:
                         exportFile.write(f"{indentspace}@staticmethod\n")
 
@@ -516,28 +454,4 @@ for file in headerFilelist2:
 #     exportFileAsStrFINAL += f"{line}{newLine}"
 exportFile.close()
 
-#import subprocess
-#import os
-## print(f"""yo f'cd "{packageDestinationPath}" & Python setup.py sdist'""")
-#
-#os.chdir(packageDestinationPath)
-#os.system(f'python setup.py sdist')
-## os.system(f'start /d "{packageDestinationPath}" cmd /c "Python setup.py sdist" ')
-## import time
-## time.sleep(10)
-## os.system(f'start cmd /k "cd \"{packageDestinationPath}\" & Python \"{packageDestinationPath}/setup.py\" sdist" /d "{packageDestinationPath}"')
-## os.system(f'start cmd /k cd Python "{setupPyFilePathIncludingFileNameAndExtension}" sdist')
-## os.system(f'cd "{packageDestinationPath}" & Python setup.py sdist')
-## raise "wa"
-#os.system(f'pip install twine')
-#os.system(f'start /d "{packageDestinationPath}" cmd /c "Python setup.py sdist" ')
-#os.system(f'cd "{packageDestinationPath}" & twine upload --verbose -r pypi "dist/*"')
 
-
-# import os
-# os.chdir(packageDestinationPath)
-# os.system(f'Python setup.py sdist')
-# import time
-# os.system(f'pip install twine')
-# os.system(f'start /d "{packageDestinationPath}" cmd /c "Python setup.py sdist" ')
-# os.system(f'cd "{packageDestinationPath}" & twine upload --verbose -r pypi "dist/*"')
