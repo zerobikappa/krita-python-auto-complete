@@ -45,6 +45,7 @@ jobs:
       - name: retrieve actual krita version
         id: retrieve_krita_version
         run: |
+          ls
           cd krita*
           s="$(grep -i "set(KRITA_VERSION_STRING" CMakeLists.txt)"
           s="${s%\"*}"
