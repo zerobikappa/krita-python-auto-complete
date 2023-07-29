@@ -315,8 +315,8 @@ for file in headerFilelist2:
                             returnType = "str"
                         elif returnType == "QList":
                             returnType = "list"
-                        elif returnType.__len__()>0:
-                            returnType = returnType + "()"
+#                        elif returnType.__len__()>0:
+#                            returnType = returnType + "()"
                         functionList = functionList.split(' ')[1]
 
                     if functionList.__len__() < 1:
@@ -389,7 +389,8 @@ for file in headerFilelist2:
                         else:
                             paramsList = "self, " + paramsList
 
-                    exportFile.write(f"{indentspace}def " + functionList + "(" + paramsList + "):\n")
+#                    exportFile.write(f"{indentspace}def " + functionList + "(" + paramsList + "):\n")
+                    exportFile.write(f"{indentspace}def " + functionList + "(" + paramsList + ")->" + returnType + ":\n")
 
 
 
@@ -433,7 +434,7 @@ for file in headerFilelist2:
                     functionCommentsOutput = f"{newLine}{indentspace8}{functionCommentsOutput}{newLine}{indentspace8}{parameterPartOfComment}{formatParamForDocString('return', returnType)}{newLine}"
                         
                     exportFile.write(f"{indentspace8}\"\"\" " + functionCommentsOutput + f"{indentspace8}\"\"\"\n" )
-                    exportFile.write(f"{indentspace8}return {returnType}\n\n" )
+#                    exportFile.write(f"{indentspace8}return {returnType}\n\n" )
 
 
 
