@@ -36,6 +36,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: KDE/krita
+          sparse-checkout: |
+            CMakeLists.txt
+            libs/libkis
+          fetch-depth: 1
           path: krita-${{ github.event.inputs.krita_version }}
 
       - name: download krita source code (from release)
