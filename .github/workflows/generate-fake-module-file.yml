@@ -45,7 +45,7 @@ jobs:
       - name: download krita source code (from release)
         if: github.event.inputs.krita_version != 'master'
         run: |
-          wget -c "https://github.com/KDE/krita/releases/tag/${{ github.event.inputs.krita_version }}.tar.gz"
+          wget -c "https://github.com/KDE/krita/archive/refs/tags/${{ github.event.inputs.krita_version }}.tar.gz"
           tar zxvf *.tar.gz
           rm *.tar.gz
 
