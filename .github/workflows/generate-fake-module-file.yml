@@ -16,7 +16,7 @@ jobs:
   krita-pyi:
     runs-on: ubuntu-latest
     permissions:
-      packages: write
+      contents: write
     steps:
       - name: install packages
         run: |
@@ -52,7 +52,7 @@ jobs:
           rm *.tar.gz
 
       - name: retrieve actual krita version
-        id: retrieve_krita_version
+        id: retrieve_actual_version
         run: |
           cd "krita-${{ github.event.inputs.krita_version }}"
           s="$(grep -i "set(KRITA_VERSION_STRING" CMakeLists.txt)"
@@ -66,24 +66,22 @@ jobs:
           echo "kritaHomeDir = \"$(pwd)/krita-${{ github.event.inputs.krita_version }}\""
           echo "kritaHomeDir = \"$(pwd)/krita-${{ github.event.inputs.krita_version }}\"" > /tmp/kritaHomeDirSave.py
           python ./krita-python-auto-complete/generate-python-autocomplete-file.py
-          cp output/krita.pyi ~
           cp output/krita.pyi .
 
       - name: save krita.py to artifact
         uses: actions/upload-artifact@v3
         with:
           name: krita.pyi
-          path: ~/krita.pyi
+          path: krita.pyi
           retention-days: 5
 
       - name: auto release
         if: github.event.inputs.is_to_release == 'y'
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: softprops/action-gh-release@v1
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ steps.retrieve_krita_version.outputs.actual_krita_version }}"
-          title: "fake definition wrapper krita.pyi for krita-${{ steps.retrieve_krita_version.outputs.actual_krita_version }}"
           prerelease: true
+          name: "fake definition wrapper krita.pyi for krita-${{ steps.retrieve_actual_version.outputs.actual_krita_version }}"
+          tag_name: ${{ steps.retrieve_actual_version.outputs.actual_krita_version }}
           files: |
             krita.pyi
 
