@@ -28,12 +28,15 @@ jobs:
 
       - name: download this repo
         uses: actions/checkout@v3
+        with:
+          path: krita-python-auto-complete
 
       - name: download krita source code (from git master)
         if: github.event.inputs.krita_version == 'master'
         uses: actions/checkout@v3
         with:
           repository: KDE/krita
+          path: krita-master
 
       - name: download krita source code (from release)
         if: github.event.inputs.krita_version != 'master'
