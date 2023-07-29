@@ -5,10 +5,12 @@ on:
     inputs:
       krita_version:
         description: 'select krita version, for git master branch, please input "master", for other released version, please input the version number, such as "5.1.0"'
-        required: false
+        required: true
         default: 'master'
       is_to_release:
         description: 'release the generated file?(y/n, default is n. Even if you select "n", you still can download the generated file from the "Artifacts" column in the run-job page.)'
+        required: true
+        default: 'n'
 
 jobs:
   krita-py:
