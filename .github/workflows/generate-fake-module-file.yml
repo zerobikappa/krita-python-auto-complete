@@ -18,8 +18,8 @@ jobs:
     steps:
       - name: install packages
         run: |
-          apt-get update -y
-          apt-get install -y wget
+          sudo apt-get update -y
+          sudo apt-get install -y wget
 
       - name: setup python3
         uses: actions/setup-python@v4
