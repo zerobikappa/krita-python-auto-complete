@@ -1,0 +1,82 @@
+name: generate fake module file
+
+on:
+  workflow_dispatch:
+    inputs:
+      krita_version:
+        description: 'select krita version, for git master branch, please input "master", for other released version, please input the version number, such as "5.1.0"'
+        required: false
+        default: 'master'
+      is_to_release:
+        description: 'release the generated file?(y/n, default is n. Even if you select "n", you still can download the generated file from the "Artifacts" column in the run-job page.)'
+
+jobs:
+  krita-py:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install packages
+        run: |
+          apt-get update -y
+          apt-get install -y wget
+
+      - name: setup python3
+        use: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: download this repo
+        uses: actions/checkout@v3
+
+      - name: download krita source code (from git master)
+        if: github.event.inputs.krita_version == 'master'
+        use: actions/checkout@v3
+        with:
+          repository: KDE/krita
+
+      - name: download krita source code (from release)
+        if: github.event.inputs.krita_version != 'master'
+        run: |
+          wget -c "https://github.com/KDE/krita/releases/tag/${{ github.event.inputs.krita_version }}.tar.gz"
+          tar zxvf *.tar.gz
+          rm *.tar.gz
+
+      - name: retrieve actual krita version
+        id: retrieve_krita_version
+        run: |
+          cd krita*
+          s="$(grep -i "set(KRITA_VERSION_STRING" CMakeLists.txt)"
+          s="${s%\"*}"
+          s="${s#*\"}"
+          echo "actual_krita_version=$s" >> $GITHUB_OUTPUT
+          cd ${{ github.workspace }}
+
+      - name: generate krita.py
+        run: |
+          echo "kritaHomeDir = \"$(pwd)/krita-${{ github.event.inputs.krita_version }}\""
+          echo "kritaHomeDir = \"$(pwd)/krita-${{ github.event.inputs.krita_version }}\"" > /tmp/kritaHomeDirSave.py
+          python ./krita-python-auto-complete/generate-python-autocomplete-file.py
+          cp output/krita.pyi ~
+          cp output/krita.pyi .
+
+      - name: save krita.py to artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: krita.pyi
+          path: ~/krita.pyi
+          retention-days: 5
+
+      - name: auto release
+        if: github.event.inputs.is_to_release == 'y'
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "${{ steps.retrieve_krita_version.outputs.actual_krita_version }}"
+          title: "fake module krita.py for krita-${{ steps.retrieve_krita_version.outputs.actual_krita_version }}"
+          prerelease: true
+          files: |
+            krita.pyi
+
+
+
+
+

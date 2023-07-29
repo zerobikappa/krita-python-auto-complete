@@ -8,16 +8,14 @@ generatorVersion = 0.1
 # os.chdir("/home/scottpetrovic/krita/src/libs/libkis")
 
 import tempfile
-import imp
 from importlib.machinery import SourceFileLoader
 from tkinter.filedialog import askdirectory
-from tkinter.messagebox import askyesno
+#from tkinter.messagebox import askyesno
 kritaHomeDir =  ""
 savedConfig = tempfile.gettempdir()+"/kritaHomeDirSave.py"
 if os.path.isfile(savedConfig):
-    isToLoadSavedConfig = askyesno("use previous config", f"Krita source path config was found in {savedConfig}, would you like to use it?")
-    if isToLoadSavedConfig:
-#        m = imp.load_source("myModule", savedConfig)
+#    isToLoadSavedConfig = askyesno("use previous config", f"Krita source path config was found in {savedConfig}, would you like to use it?")
+#    if isToLoadSavedConfig:
         m = SourceFileLoader("myModule", savedConfig).load_module()
         kritaHomeDir = getattr(m, "kritaHomeDir")
         del m
@@ -41,21 +39,15 @@ kritaLibLibKisPath = f"{kritaHomeDir}/libs/libkis"
 cwd = os.getcwd()
 moduleDestinationPath = fr"{cwd}/output".replace('\\', '/') # Where to store the output module
 
-import os
-import glob
-
-packageDestinationPath = moduleDestinationPath + '/pyKrita'
 import shutil
 try:
-    shutil.rmtree(packageDestinationPath)
+    shutil.rmtree(moduleDestinationPath)
 except:
     pass
 # raise ""
 # files = glob.glob(packageDestinationPath + '/*')
 # for f in files:
 #     os.remove(f)
-moduleDestinationPath = packageDestinationPath + '/src/krita'
-setupPyFilePathIncludingFileNameAndExtension = packageDestinationPath + '/setup.py'
 os.chdir(kritaLibLibKisPath)
 
 
@@ -66,7 +58,8 @@ os.chdir(kritaLibLibKisPath)
 # create new file to save to. "w+" means write and create a file. saves in directory specified above
 os.makedirs(f"{moduleDestinationPath}", exist_ok=True)
 
-exportFile = open(f"{moduleDestinationPath}/__init__.py", "w+")
+#exportFile = open(f"{moduleDestinationPath}/__init__.py", "w+")
+exportFile = open(f"{moduleDestinationPath}/krita.pyi", "w+")
 
 # a bit of a readme for what this does
 exportFile.write(f"""
@@ -322,6 +315,8 @@ for file in headerFilelist2:
                             returnType = "str"
                         elif returnType == "QList":
                             returnType = "list"
+                        elif returnType.__len__()>0:
+                            returnType = returnType + "()"
                         functionList = functionList.split(' ')[1]
 
                     if functionList.__len__() < 1:
@@ -387,6 +382,12 @@ for file in headerFilelist2:
 
                     if isStatic:
                         exportFile.write(f"{indentspace}@staticmethod\n")
+
+                    if not isStatic:
+                        if paramsList.__len__() == 0:
+                            paramsList = "self"
+                        else:
+                            paramsList = "self, " + paramsList
 
                     exportFile.write(f"{indentspace}def " + functionList + "(" + paramsList + "):\n")
 
