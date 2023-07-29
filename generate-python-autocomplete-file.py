@@ -433,7 +433,7 @@ for file in headerFilelist2:
                     
                     functionCommentsOutput = f"{newLine}{indentspace8}{functionCommentsOutput}{newLine}{indentspace8}{parameterPartOfComment}{formatParamForDocString('return', returnType)}{newLine}"
                         
-                    exportFile.write(f"{indentspace8}\"\"\" " + functionCommentsOutput + f"{indentspace8}\"\"\"\n" )
+                    exportFile.write(f"{indentspace8}\"\"\" " + functionCommentsOutput + f"{indentspace8}\"\"\"\n\n" )
 #                    exportFile.write(f"{indentspace8}return {returnType}\n\n" )
 
 
