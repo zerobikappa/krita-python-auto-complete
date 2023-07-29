@@ -15,6 +15,8 @@ on:
 jobs:
   krita-pyi:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     steps:
       - name: install packages
         run: |
@@ -80,7 +82,7 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "${{ steps.retrieve_krita_version.outputs.actual_krita_version }}"
-          title: "fake module krita.py for krita-${{ steps.retrieve_krita_version.outputs.actual_krita_version }}"
+          title: "fake definition wrapper krita.pyi for krita-${{ steps.retrieve_krita_version.outputs.actual_krita_version }}"
           prerelease: true
           files: |
             krita.pyi
