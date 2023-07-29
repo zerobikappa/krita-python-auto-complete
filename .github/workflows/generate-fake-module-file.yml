@@ -22,7 +22,7 @@ jobs:
           apt-get install -y wget
 
       - name: setup python3
-        use: actions/setup-python@v4
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
@@ -31,7 +31,7 @@ jobs:
 
       - name: download krita source code (from git master)
         if: github.event.inputs.krita_version == 'master'
-        use: actions/checkout@v3
+        uses: actions/checkout@v3
         with:
           repository: KDE/krita
 
