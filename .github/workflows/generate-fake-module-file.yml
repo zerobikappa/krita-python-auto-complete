@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: KDE/krita
-          path: krita-master
+          path: krita-${{ github.event.inputs.krita_version }}
 
       - name: download krita source code (from release)
         if: github.event.inputs.krita_version != 'master'
@@ -48,8 +48,7 @@ jobs:
       - name: retrieve actual krita version
         id: retrieve_krita_version
         run: |
-          ls
-          cd krita*
+          cd "krita-${{ github.event.inputs.krita_version }}"
           s="$(grep -i "set(KRITA_VERSION_STRING" CMakeLists.txt)"
           s="${s%\"*}"
           s="${s#*\"}"
