@@ -80,7 +80,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
-          name: "fake definition wrapper krita.pyi for krita-${{ steps.retrieve_actual_version.outputs.actual_krita_version }}"
+          name: "krita-${{ steps.retrieve_actual_version.outputs.actual_krita_version }} script .pyi file"
           tag_name: ${{ steps.retrieve_actual_version.outputs.actual_krita_version }}
           files: |
             krita.pyi
