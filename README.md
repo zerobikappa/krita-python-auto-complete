@@ -1,51 +1,86 @@
-# Fake pyKrita: A Python Auto-completion generator
+# Fake Krita PYI generator
 
-Is a Python "fake" module generator for PyKrita. Its purpose is to provide intellisense and code completion in your code editor to simplify the development process when making krita extensions. 
+This project aims to provide intellisense and code completion in your code editor to simplify the development process when making krita extensions.
 
-Traditionally, language servers & code editors like VS Code, PyCharm & Vim (etc) wont be able to recognize the krita module and hence throw warnings and errors at you everywhere as it simply do not know of this “krita” module, which is what “Fake pyKrita” is meant to solve.
+Traditionally, language servers & code editors like VS Code, PyCharm & Vim (etc) wont be able to recognize the krita module and hence throw warnings and errors at you everywhere as it simply do not know of this “krita” module, which is what this project is meant to solve.
 
 A quick demo video:
 
-
 https://user-images.githubusercontent.com/20190653/163692838-c6f9d7a2-2b3d-4649-a077-32df41c57842.mp4
 
+This project was:
+Originally created by @scottpetrovic ([krita-python-auto-complete](https://github.com/scottpetrovic/krita-python-auto-complete))
+&darr;
+Enhanced by @ItsCubeTime ([fake-pykrita](https://github.com/ItsCubeTime/fake-pykrita))
+&darr;
+I shrinked a part of their codes and added some new features, to make it more easy to use. ([now you are here](https://github.com/zerobikappa/krita-python-auto-complete))
 
-Originally forked from: https://github.com/scottpetrovic/krita-python-auto-complete . I built on his code to make it functional with todays code base & potentially more future proof, added parameter types into method comments & had an attempt at creating an automated deployment system to Pypi (when you run the script it will try to upload the package to Pypi immediatly, this is still quite wip).
+(I removed some directories and files, including the `pykrita` directory, therefore I changed the repo name back to the initial one)
+
+## 1.How to use
+
+All you need to obtain from this project is only one file: `krita.pyi`. A `.pyi` file is a **Python Interface Definition file** that contains code stub reference for implementation of the interface. Just put the file to the same path of you python script, or place it to the directory, which was contained in `$PYTHONPATH`, then your IDE or LSP will be able to grab suggestions from this file.
+
+### 1.1.Get a pre-built krita.pyi file in Github Release
+
+(1) Download the `krita.pyi` file from [github release](https://github.com/zerobikappa/krita-python-auto-complete/releases). It is recommended to choose the version which is the same as your Krita version.
+
+(2) Move the `krita.pyi` file into your project directory(where the `__init__.py` file was contained).
+
+(3) Add this line in your python script:
+
+```python
+from krita import *
+```
+
+(4) optionally, if there are other module directories in your project folder, you may need to add your project directory in `$PYTHONPATH`, so that the language server can find your `krita.pyi` file.
+
+In step(2) you can place the `krita.pyi` file in any other directory instead of your project folder, as long as that folder is in your `$PYTHONPATH`. However, in order to keep your system clean, maybe it is not recommended to install it in your system path or user path. I think it is better to place it in your project folder, then you can restrict the changes only in your project folder -- you can also change `$PYTHONPATH` in your project setting, or add `krita.pyi` in your `.gitignore` file, or do whatever you want.
+
+## 2.How to build
+
+If you cannot find a proper `krita.pyi` file in [github release](https://github.com/zerobikappa/krita-python-auto-complete/releases), you can generate it by yourself.
+
+### 2.1 Use generator script to build `krita.pyi`
+
+(1) Obtain Krita source code
+Download Krita source code from [Krita project page](https://github.com/KDE/krita/tags)
+
+(2) Download generator script from this repository
+
+```bash
+wget -c https://raw.githubusercontent.com/zerobikappa/krita-python-auto-complete/master/generate-python-autocomplete-file.py
+```
+
+(3) Run script
+
+```bash
+python generate-python-autocomplete-file.py
+```
+
+(4) You may see a file dialog popup, which ask you choose Krita source code directory. **Please select the path where contains Krita Project's main `CMakeLists.txt` file.** Then click "OK" to run script.
+
+(5) After complete without error, you can found an `output` directory was created in your current location, and the `krita.pyi` is in it.
+
+```bash
+.
+├── generate-python-autocomplete-file.py
+└── output
+    └── krita.pyi
+
+2 directories, 2 files
+```
+
+(6) (Optional) After first run the script, the setting of Krita source code path will be saved in `/tmp/kritaHomeDirSave.py`(for Linux) or `C:\Users\AppData\Local\Temp\kritaHomeDirSave.py`(for Windows). When you run the script again, it will not ask you again for the source code path, unless you remove the `kritaHomeDirSave.py` or reboot your computer.
+
+If you want to build the `krita.pyi` in non-interactive session (such as `CI` or `github action`), you can prepare the `kritaHomeDirSave.py` file in advance. For example:
+
+```bash
+echo "kritaHomeDir = \"/home/username/Downloads/krita-5.1.0\"" > /tmp/kritaHomDirSave.py
+```
+
+For more details, please refer [my github action workflow file](https://github.com/zerobikappa/krita-python-auto-complete/blob/master/.github/workflows/generate-fake-module-file.yml).
+You can fork this repository as well and run the action by yourself. Do whatever you want.
 
 
-## Usage & installation
 
-### Pre-packaged packages
-
-This is the easiest way of benefiting from the generator. These pre packaged packages are installed like any other python package, simply download a tar.gz file from any of the prepackaged releases https://github.com/ItsCubeTime/fake-pykrita/releases/latest & run `pip install C:/Path/To/Tar/Gz/file.tar.gz`. Make sure that you call the correct pip - the one thats associated with the intrerpreter of which your IDE is using.
-
-After this, restart your code editor & enjoy <3
-
-
-### Using the generator itself
-
-Download the `generate-python-autocomplete-file.py` and modify the 2 strings `kritaHomeDir` & `moduleDestinationPath` to suit your needs.
-
-`kritaHomeDir` should point towards the directory that has kritas main CMakeLists.txt - it should point towards the source code of Krita.
-
-`moduleDestinationPath` This is where the package will get created locally on your PC. Make sure you dont have any important files in this directory :3
-
-Now you can run the script file with `python generate-python-autocomplete-file.py`. As of writing this, its known to work on Python 3.10.2 in a Windows 11 environment.
-
-### Installing the module for your code editor
-
-First you will need to figure out what Python installation your code editors language server uses and then find its associated pip executable. Once located, run `pip install pathToTheGeneratedTarGz.tar.gz`. Which will be live under `kritaHomeDir/pyKrita/dist` where `kritaHomeDir` is where you set the variable `kritaHomeDir` in `generate-python-autocomplete-file.py` to point towards.
-
-
-
-
-### Uploading to Pypi
-*As of writing this, uploading to pip may not work correctly. Still trying to figure this one out, contributions are welcome*
-
-As the script runs it will attempt uploading to Pypi, where "twine" will ask you for your Pypi login credentials, if you dont want to upload to pypi, you can simply hit ctrl C with your terminal focused to cancel. You will still have your generated files where you pointed your `KritaHomeDir`.
-
-Anyone is welcome to try & upload the generated files to Pypi <3 If you do manage to successfully upload it, please do also open a discussion at https://github.com/ItsCubeTime/fake-pykrita/discussions & drop a link to the pypi adress!
-
-## Contributing
-
-Im open to accept any PRs \^-^/
