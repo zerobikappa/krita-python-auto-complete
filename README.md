@@ -9,17 +9,23 @@ A quick demo video:
 https://user-images.githubusercontent.com/20190653/163692838-c6f9d7a2-2b3d-4649-a077-32df41c57842.mp4
 
 This project was:
+
 Originally created by @scottpetrovic ([krita-python-auto-complete](https://github.com/scottpetrovic/krita-python-auto-complete))
+
 &darr;
+
 Enhanced by @ItsCubeTime ([fake-pykrita](https://github.com/ItsCubeTime/fake-pykrita))
+
 &darr;
+
 I shrinked a part of their codes and added some new features, to make it more easy to use. ([now you are here](https://github.com/zerobikappa/krita-python-auto-complete))
 
 (I removed some directories and files, including the `pykrita` directory, therefore I changed the repo name back to the initial one)
 
+
 ## 1.How to use
 
-All you need to obtain from this project is only one file: `krita.pyi`. A `.pyi` file is a **Python Interface Definition file** that contains code stub reference for implementation of the interface. Just put the file to the same path of you python script, or place it to the directory, which was contained in `$PYTHONPATH`, then your IDE or LSP will be able to grab suggestions from this file.
+All you need to obtain from this project is only one file: `krita.pyi`. A `.pyi` file is a **Python Interface Definition file** that contains code stub reference for implementation of the interface. Just put the file to the same path of you python script, or place it to the directory, which was included in `$PYTHONPATH`, then your IDE or LSP will be able to grab suggestions from this file.
 
 ### 1.1.Get a pre-built krita.pyi file in Github Release
 
