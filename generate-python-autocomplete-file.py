@@ -290,6 +290,23 @@ for file in headerFilelist2:
             return output
 
 
+        def replaceCppKeyWord(input: str, cppKey: str, pythonKey: str) -> str:
+            output = ' ' + input + ' '
+            output = re.sub(f'\\s{cppKey}\\s', f' {pythonKey} ', output)
+            a = ['<', '>', '\\(', '\\)', ',', '\\*']
+            for i in a:
+                j = i[-1]
+                output = re.sub(f'\\s{cppKey}{i}', f' {pythonKey}{j}', output)
+                output = re.sub(f'{i}{cppKey}\\s', f'{j}{pythonKey} ', output)
+            return output
+
+
+
+        line = replaceCppKeyWord(line, 'void', 'None')
+        line = replaceCppKeyWord(line, 'QString', 'str')
+        line = replaceCppKeyWord(line, 'QList', 'list')
+        line = replaceCppKeyWord(line, 'qreal', 'float')
+        line = replaceCppKeyWord(line, 'double', 'float')
         line = removeSpacesWithinLimiters(line, '<', '>')
         line = line.replace('<', '[').replace('>', ']')
 
@@ -310,7 +327,7 @@ for file in headerFilelist2:
 
                     functionLineNumber = j
                     functionList = line.split("(")[0]
-                    functionList = functionList.replace("*", "").replace("const", "").replace(">", "")
+                    functionList = functionList.replace("*", "").replace("const", "")
 
                     if "virtual" in functionList:
                         isVirtual = True
@@ -331,18 +348,6 @@ for file in headerFilelist2:
                     #first word is usually the return type
                     if " " in functionList:
                         returnType = functionList.split(' ')[0]
-                        if returnType == "void":
-                            returnType = "None"
-                        #elif returnType == "QString":
-                        #    returnType = "str"
-                        elif 'Qstring[' in returnType:
-                            returnType = returnType.replace('QString', 'str')
-                        #elif returnType == "QList":
-                        #    returnType = "list"
-                        elif 'QList[' in returnType:
-                            returnType = returnType.replace('QList', 'list')
-#                        elif returnType.__len__()>0:
-#                            returnType = returnType + "()"
                         functionList = functionList.split(' ')[1]
 
                     if functionList.__len__() < 1:
@@ -384,7 +389,8 @@ for file in headerFilelist2:
                                     parameterName = splittedStr[1]
                                 parameterType = splittedStr[0]
                                 print(f"splittedStr: {splittedStr}")
-                                multipleParamsList.append(f"{parameterName}")
+                                #multipleParamsList.append(f"{parameterName}")
+                                multipleParamsList.append(f"{parameterName}: {parameterType}")
                                 paramTypeAndName = ParamTypeAndName()
                                 paramTypeAndName.name = parameterName
                                 paramTypeAndName.type = parameterType
