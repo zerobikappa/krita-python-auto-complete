@@ -12,9 +12,9 @@ from importlib.machinery import SourceFileLoader
 from tkinter.filedialog import askdirectory
 #from tkinter.messagebox import askyesno
 kritaHomeDir =  ""
-savedConfig = tempfile.gettempdir()+"/kritaHomeDirSave.py"
+savedConfig = os.path.join(tempfile.gettempdir(), 'kritaHomeDirSave.py')
 if os.path.isfile(savedConfig):
-#    isToLoadSavedConfig = askyesno("use previous config", f"Krita source path config was found in {savedConfig}, would you like to use it?")
+#    isToLoadSavedConfig = askyesno("found previous config", f"Krita source path config was found in {savedConfig}, would you like to use it?")
 #    if isToLoadSavedConfig:
         m = SourceFileLoader("myModule", savedConfig).load_module()
         kritaHomeDir = getattr(m, "kritaHomeDir")
@@ -221,8 +221,8 @@ for file in headerFilelist2:
         indentspace = indentspace0
 
 
-
-    exportFile.write(f"{indentspace}\"\"\" " +  classCommentsOutput   +  "    \"\"\""  +   "\n\n")
+    exportFile.write(f"{indentspace}\"\"\"<{currentFile.name}>\n")
+    exportFile.write(f"{indentspace}" +  classCommentsOutput   +  f"{indentspace}\"\"\""  +   "\n\n")
 
 
 
@@ -236,7 +236,7 @@ for file in headerFilelist2:
     #we save the line of the previous function to get exactly range between signatures of the methods
     previousFunctionLineNumber = -1
     isInBlockComment = False
-    fnPattern = re.compile("\(.*\)")
+    fnPattern = re.compile(r"\(.*\)")
     for j, line in enumerate(allFileLines):
         if line.__contains__('*/'):
             isInBlockComment = False
@@ -252,24 +252,46 @@ for file in headerFilelist2:
 
         line  = line.strip() # strip white beginning and trailing white space
 
-        def removeCharactersWithinLimiters(input: str, limitBegin: str, limitEnd) -> str:
+#        def removeCharactersWithinLimiters(input: str, limitBegin: str, limitEnd) -> str:
+#            output: str = ""
+#
+#            areWeWithinLimiters = False
+#            i = -1
+#            for char in input:
+#                i += 1
+#                if char == limitBegin:
+#                    areWeWithinLimiters = True
+#                    continue
+#                if char == limitEnd:
+#                    areWeWithinLimiters = False
+#                
+#                if not areWeWithinLimiters:
+#                    output += char
+#            return output
+#            
+#        line = removeCharactersWithinLimiters(line, '<', '>')
+        def removeSpacesWithinLimiters(input: str, limitBegin: str, limitEnd: str) -> str:
             output: str = ""
-
-            areWeWithinLimiters = False
+            isWithinLimiters = False
             i = -1
+
             for char in input:
                 i += 1
                 if char == limitBegin:
-                    areWeWithinLimiters = True
+                    isWithinLimiters = True
+                elif char == limitEnd:
+                    isWithinLimiters = False
+
+                if isWithinLimiters and char == ' ':
                     continue
-                if char == limitEnd:
-                    areWeWithinLimiters = False
-                
-                if not areWeWithinLimiters:
+                else:
                     output += char
+
             return output
-            
-        line = removeCharactersWithinLimiters(line, '<', '>')
+
+
+        line = removeSpacesWithinLimiters(line, '<', '>')
+        line = line.replace('<', '[').replace('>', ']')
 
         for match in re.finditer(fnPattern, line):
             if line.strip()[0][0] != "*": # this means it is part of a comments
@@ -311,10 +333,14 @@ for file in headerFilelist2:
                         returnType = functionList.split(' ')[0]
                         if returnType == "void":
                             returnType = "None"
-                        elif returnType == "QString":
-                            returnType = "str"
-                        elif returnType == "QList":
-                            returnType = "list"
+                        #elif returnType == "QString":
+                        #    returnType = "str"
+                        elif 'Qstring[' in returnType:
+                            returnType = returnType.replace('QString', 'str')
+                        #elif returnType == "QList":
+                        #    returnType = "list"
+                        elif 'QList[' in returnType:
+                            returnType = returnType.replace('QList', 'list')
 #                        elif returnType.__len__()>0:
 #                            returnType = returnType + "()"
                         functionList = functionList.split(' ')[1]
@@ -433,7 +459,8 @@ for file in headerFilelist2:
                     
                     functionCommentsOutput = f"{newLine}{indentspace8}{functionCommentsOutput}{newLine}{indentspace8}{parameterPartOfComment}{formatParamForDocString('return', returnType)}{newLine}"
                         
-                    exportFile.write(f"{indentspace8}\"\"\" " + functionCommentsOutput + f"{indentspace8}\"\"\"\n\n" )
+                    exportFile.write(f"{indentspace8}\"\"\"<{currentFile.name}>\n")
+                    exportFile.write(f"{indentspace8}" + functionCommentsOutput + f"{indentspace8}\"\"\"\n\n" )
 #                    exportFile.write(f"{indentspace8}return {returnType}\n\n" )
 
 
