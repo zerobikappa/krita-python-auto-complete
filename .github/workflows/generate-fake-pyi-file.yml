@@ -1,0 +1,125 @@
+name: generate fake pyi file
+
+on:
+  workflow_dispatch:
+    inputs:
+      krita_version:
+        description: 'select krita version: (1)for git master branch, please input "master". (2)for other released version, please input the version number, such as "5.1.0". (3)for more than one version, please split them by space, for example "master 5.1.0 5.1.2 5.1.3"'
+        required: true
+        type: string
+        default: 'master'
+      is_to_release:
+        description: 'release the generated file?(y/n, default is n. Even if you select "n", you still can download the generated file from the "Artifacts" column in the jobs summary page.)'
+        required: true
+        default: 'n'
+
+jobs:
+  setup_version_matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - id: setMatrix
+        run: |
+          count=0
+          for i in ${{ inputs.krita_version }};do
+            count=$[$count+1]
+          done
+          echo -n "versions={\"versions\":[" > temp.json
+          for i in ${{ inputs.krita_version }};do
+            if [ $count != 1 ];then
+              echo -n "\"$i\", " >> temp.json
+              count=$[$count-1]
+            else
+              echo -n "\"$i\"" >> temp.json
+            fi
+          done
+          echo -n "]}" >> temp.json
+          echo "request versions:"
+          cat temp.json
+          cat temp.json >> $GITHUB_OUTPUT
+    outputs:
+      versions: ${{ steps.setMatrix.outputs.versions }}
+
+  krita-pyi:
+    runs-on: ubuntu-latest
+    needs: setup_version_matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup_version_matrix.outputs.versions) }}
+    permissions:
+      contents: write
+    steps:
+      - name: install packages
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget
+
+      - name: setup python3
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: download this repo
+        uses: actions/checkout@v3
+        with:
+          path: krita-python-auto-complete
+
+      - name: download krita source code (from git master)
+        if: matrix.versions == 'master'
+        uses: actions/checkout@v3
+        with:
+          repository: KDE/krita
+          sparse-checkout: |
+            CMakeLists.txt
+            libs/libkis
+          fetch-depth: 1
+          path: krita-${{ matrix.versions }}
+
+      - name: download krita source code (from released tag)
+        if: matrix.versions != 'master'
+        uses: actions/checkout@v3
+        with:
+          repository: KDE/krita
+          ref: ${{ matrix.versions }}
+          sparse-checkout: |
+            CMakeLists.txt
+            libs/libkis
+          fetch-depth: 1
+          path: krita-${{ matrix.versions }}
+
+      - name: retrieve actual krita version
+        id: retrieve_actual_version
+        run: |
+          cd "krita-${{ matrix.versions }}"
+          s="$(grep -i "set(KRITA_VERSION_STRING" CMakeLists.txt)"
+          s="${s%\"*}"
+          s="${s#*\"}"
+          echo "actual_krita_version=$s" >> $GITHUB_OUTPUT
+          cd ${{ github.workspace }}
+
+      - name: generate krita.py
+        run: |
+          echo "actual krita version is:"
+          echo "${{ steps.retrieve_actual_version.outputs.actual_krita_version }}"
+          echo "kritaHomeDir = \"$(pwd)/krita-${{ matrix.versions }}\""
+          echo "kritaHomeDir = \"$(pwd)/krita-${{ matrix.versions }}\"" > /tmp/kritaHomeDirSave.py
+          python ./krita-python-auto-complete/generate-python-autocomplete-file.py
+          cp output/krita.pyi .
+
+      - name: save krita.py to artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: krita-${{ steps.retrieve_actual_version.outputs.actual_krita_version }}.pyi
+          path: krita.pyi
+          retention-days: 5
+
+      - name: auto release
+        if: github.event.inputs.is_to_release == 'y'
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: true
+          name: "fake definition wrapper krita.pyi for krita-${{ steps.retrieve_actual_version.outputs.actual_krita_version }}"
+          tag_name: ${{ steps.retrieve_actual_version.outputs.actual_krita_version }}
+          files: |
+            krita.pyi
+
+
