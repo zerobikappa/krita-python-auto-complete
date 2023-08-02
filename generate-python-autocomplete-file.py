@@ -28,9 +28,6 @@ if kritaHomeDir.__len__() == 0:
         quit()
     if os.path.isdir(kritaHomeDir):
         print(f"kritaHomeDir = {kritaHomeDir}")
-        exportSaveConfigFile = open(savedConfig, "w")
-        exportSaveConfigFile.write(f"kritaHomeDir = \"{kritaHomeDir}\"")
-        exportSaveConfigFile.close()
     else:
         print(f"kritaHomeDir = {kritaHomeDir}, not a vaild path")
         quit(1)
@@ -38,6 +35,13 @@ if kritaHomeDir.__len__() == 0:
 # Note that you need to have the actual source code & not a prebuilt version of Krita. THIS DIRETORY SHOULD HAVE THE CMakeLists.txt FILE directly in it
 
 kritaLibLibKisPath = f"{kritaHomeDir}/libs/libkis"
+if os.path.isdir(kritaLibLibKisPath):
+    exportSaveConfigFile = open(savedConfig, "w")
+    exportSaveConfigFile.write(f"kritaHomeDir = \"{kritaHomeDir}\"")
+    exportSaveConfigFile.close()
+else:
+    print(f"You selected krita source code path is: {kritaHomeDir}\nbut we cannot find libs/libkis directory under this path.")
+    quit(1)
 
 
 cwd = os.getcwd()
@@ -256,24 +260,6 @@ for file in headerFilelist2:
 
         line  = line.strip() # strip white beginning and trailing white space
 
-#        def removeCharactersWithinLimiters(input: str, limitBegin: str, limitEnd) -> str:
-#            output: str = ""
-#
-#            areWeWithinLimiters = False
-#            i = -1
-#            for char in input:
-#                i += 1
-#                if char == limitBegin:
-#                    areWeWithinLimiters = True
-#                    continue
-#                if char == limitEnd:
-#                    areWeWithinLimiters = False
-#                
-#                if not areWeWithinLimiters:
-#                    output += char
-#            return output
-#            
-#        line = removeCharactersWithinLimiters(line, '<', '>')
         def removeSpacesWithinLimiters(input: str, limitBegin: str, limitEnd: str) -> str:
             output: str = ""
             isWithinLimiters = False
@@ -296,12 +282,8 @@ for file in headerFilelist2:
 
         def replaceCppKeyWord(input: str, cppKey: str, pythonKey: str) -> str:
             output = ' ' + input + ' '
-            output = re.sub(f'\\s{cppKey}\\s', f' {pythonKey} ', output)
-            a = ['<', '>', '\\(', '\\)', ',', '\\*']
-            for i in a:
-                j = i[-1]
-                output = re.sub(f'\\s{cppKey}{i}', f' {pythonKey}{j}', output)
-                output = re.sub(f'{i}{cppKey}\\s', f'{j}{pythonKey} ', output)
+            #match white-character and ,*<>()[]
+            output = re.sub(f'([\\s,\\*<>\\(\\)\\[\\]]){cppKey}([\\s,\\*<>\\(\\)\\[\\]])', f'\\1{pythonKey}\\2', output)
             return output
 
 
