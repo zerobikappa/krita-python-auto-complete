@@ -1,4 +1,4 @@
-# Fake Krita PYI generator
+# Krita Fake PYI generator
 
 This project aims to provide intellisense and code completion in your code editor to simplify the development process when making krita extensions.
 
@@ -18,16 +18,17 @@ Enhanced by @ItsCubeTime ([fake-pykrita](https://github.com/ItsCubeTime/fake-pyk
 
 &darr;
 
-I shrinked a part of their codes and added some new features, to make it more easy to use. ([now you are here](https://github.com/zerobikappa/krita-python-auto-complete))
+I shrinked a part of their codes and added some new features, to make it easier to use. ([now you are here](https://github.com/zerobikappa/krita-python-auto-complete))
 
 (I removed some directories and files, including the `pykrita` directory, therefore I changed the repo name back to the initial one)
 
 
 ## 1.How to use
 
-All you need to obtain from this project is only one file: `krita.pyi`. A `.pyi` file is a **Python Interface Definition file** that contains code stub reference for implementation of the interface. Just put the file to the same path of you python script, or place it to the directory, which was included in `$PYTHONPATH`, then your IDE or LSP will be able to grab suggestions from this file.
+All you need to obtain from this project is only one file: `krita.pyi`.  
+A `.pyi` file is a **Python Interface Definition file** that contains code stub reference for implementation of the interface. Just put the file to the same path of you python script, or place it to the directory, which was included in `$PYTHONPATH`, then your IDE or LSP will be able to grab suggestions from this file.
 
-### 1.1.Get a pre-built krita.pyi file in Github Release
+### 1.1.Get a krita.pyi file from Github Release
 
 (1) Download the `krita.pyi` file from [github release](https://github.com/zerobikappa/krita-python-auto-complete/releases). It is recommended to choose the version which is the same as your Krita version.
 
@@ -64,7 +65,7 @@ wget -c https://raw.githubusercontent.com/zerobikappa/krita-python-auto-complete
 python generate-python-autocomplete-file.py
 ```
 
-(4) You may see a file dialog popup, which ask you choose Krita source code directory. **Please select the path where contains Krita Project's main `CMakeLists.txt` file.** Then click "OK" to run script.
+(4) You may see a file dialog popup, which ask you to choose the Krita source code directory. **Please select the path where contains Krita Project's main `CMakeLists.txt` file.** Then click "OK" to run script.
 
 (5) After complete without error, you can found an `output` directory was created in your current location, and the `krita.pyi` is in it.
 
@@ -77,7 +78,7 @@ python generate-python-autocomplete-file.py
 2 directories, 2 files
 ```
 
-(6) (Optional) After first run the script, the setting of Krita source code path will be saved in `/tmp/kritaHomeDirSave.py`(for Linux) or `C:\Users\AppData\Local\Temp\kritaHomeDirSave.py`(for Windows). When you run the script again, it will not ask you again for the source code path, unless you remove the `kritaHomeDirSave.py` or reboot your computer.
+(6) (Optional) Once run the script, the Krita source code path you selected will be saved in `/tmp/kritaHomeDirSave.py`(for Linux) or `C:\Users\AppData\Local\Temp\kritaHomeDirSave.py`(for Windows). When you run the script again, it will not ask you again for the source code path, unless you remove the `kritaHomeDirSave.py` or reboot your computer.
 
 If you want to build the `krita.pyi` in non-interactive session (such as `CI` or `github action`), you can prepare the `kritaHomeDirSave.py` file in advance. For example:
 
@@ -85,7 +86,7 @@ If you want to build the `krita.pyi` in non-interactive session (such as `CI` or
 echo "kritaHomeDir = \"/home/username/Downloads/krita-5.1.0\"" > /tmp/kritaHomDirSave.py
 ```
 
-For more details, please refer [my github action workflow file](https://github.com/zerobikappa/krita-python-auto-complete/blob/master/.github/workflows/generate-fake-module-file.yml).
+For more details, please refer [my github action workflow file](https://github.com/zerobikappa/krita-python-auto-complete/blob/master/.github/workflows/generate-fake-pyi-file.yml).
 You can fork this repository as well and run the action by yourself. Do whatever you want.
 
 
