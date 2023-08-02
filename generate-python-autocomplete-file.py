@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import glob, os, re  #re allows for regular expression patterns
 generatorVersion = 0.1
 # SETUP
@@ -22,6 +23,9 @@ if os.path.isfile(savedConfig):
 
 if kritaHomeDir.__len__() == 0:
     kritaHomeDir = askdirectory(title="choose the directory of Krita source code:")
+    if kritaHomeDir.__len__() == 0:
+        #"Cancel" was clicked
+        quit()
     if os.path.isdir(kritaHomeDir):
         print(f"kritaHomeDir = {kritaHomeDir}")
         exportSaveConfigFile = open(savedConfig, "w")
