@@ -88,6 +88,7 @@ d = { key: [] for key in headerFilelist}
 for file in headerFilelist:
     currentFile = open(file)
     allFileLines = currentFile.readlines()
+    currentFile.close()
     for line in allFileLines:
         if line.__contains__("#include"):
             includeFile = line.replace("#include", "").replace("\"", "").replace("\n", "").strip()
